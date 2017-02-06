@@ -52,3 +52,96 @@ So as an example a photo of [Louis Riel](https://www.collectionscanada.gc.ca/con
   </rdf:Description>
 </rdf:RDF>
 ```
+So your Resource index will have the following triples.
+
+| Subject | Predicate | Object |
+| --- |:---:|:---:|
+| info:fedora/uofm:9333 | fedora:isMemberOfCollection | info:fedora/uofm:riel |
+| info:fedora/uofm:9333 | fedora-model:hasModel | info:fedora/islandora:compoundCModel |
+| info:fedora/uofm:9333 | fedora-model:hasModel | info:fedora/uofm:highResImage |
+| info:fedora/uofm:9333 | islandora:isManageableByUser | xxxx |
+| info:fedora/uofm:9333 | islandora:isManageableByRole | yyyy |
+
+## Sparql
+
+The W3C Spec on Sparql 1.1 is split up in to a bunch of different specifications. We'll concentrate on the [Query](https://www.w3.org/TR/sparql11-query/) and maybe some [Update](https://www.w3.org/TR/sparql11-update/).
+
+The 4 forms of Sparql querying are **SELECT**, **CONSTRUCT**, **ASK** and **DESCRIBE**
+
+We'll use a larger set of Flintstones data for these examples.
+
+| Subject | Predicate | Object |
+| --- |:---:|---:|
+| :Fred | :hasAge | 25 |
+| :Fred | :hasSpouse | :Wilma |
+| :Fred | :livesIn | :Bedrock |
+| :Wilma | :livesIn | :Bedrock |
+| :Barney | :hasSpouse | :Betty |
+| :Barney | :livesIn | :Bedrock |
+| :Betty | :livesIn | :Bedrock |
+| :Fred | :hasChild | :Pebbles |
+| :Barney | :hasChild | :Bamm-Bamm |
+| :Pebbles | :hasSpouse | :Bamm-Bamm |
+| :Pebbles | :hasChild | :Roxy |
+| :Pebbles | :hasChild | :Chip |
+
+### Select
+
+This is the form most people are comfortable with. You bind values to variables and return those variables.
+
+An example using the above would be to find all of Pebbles children
+```
+SELECT ?kids WHERE {
+   :Pebbles :hasChild ?kids .
+}
+```
+
+
+
+
+### Predicates and Prefixes
+
+One of the things to remember when writing any Sparql queries is to always define your prefixes. 
+
+We've become spoiled because Fedora has a set of prefixes that are recognized by default. These are:
+
+| Prefix | Namespace |
+| --- | --- |
+| test	 | http://example.org/terms# |
+| fedora-rels-ext |	info:fedora/fedora-system:def/relations-external# |
+| fedora | info:fedora/ |
+| rdf | http://www.w3.org/1999/02/22-rdf-syntax-ns# |
+| fedora-model | info:fedora/fedora-system:def/model# |
+| fedora-view | info:fedora/fedora-system:def/view# |
+| mulgara | http://mulgara.org/mulgara# |
+| dc | http://purl.org/dc/elements/1.1/ |
+| xml-schema | http://www.w3.org/2001/XMLSchema# |
+
+So many of our Islandora queries appear in code [like this](https://github.com/Islandora/islandora_paged_content/blob/7.x/includes/utilities.inc#L61-L76).
+
+The internally registered prefixes allow you to avoid registering them in your query. However, because this is only good for Mulgara you run into trouble if you switch to using a different triplestore.
+
+You can avoid that problem by simply registering each prefix you intend to use in your query, so the above example becomes.
+```
+  PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
+  PREFIX fedora-model: <info:fedora/fedora-system:def/model#>
+  PREFIX fedora-view: <info:fedora/fedora-system:def/view#>
+  PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
+  SELECT ?pid ?page ?label ?width ?height
+  FROM <#ri>
+  WHERE {
+    ?pid fedora-rels-ext:isMemberOf <info:fedora/{$object->id}> ;
+         fedora-model:label ?label ;
+         islandora-rels-ext:isSequenceNumber ?page ;
+         fedora-model:state fedora-model:Active .
+    OPTIONAL {
+      ?pid fedora-view:disseminates ?dss .
+      ?dss fedora-view:disseminationType <info:fedora/*/JP2> ;
+           islandora-rels-ext:width ?width ;
+           islandora-rels-ext:height ?height .
+   }
+  }
+  ORDER BY ?page
+```
+
+Now this query will operate identically on any triplestore that support Sparql.
