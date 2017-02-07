@@ -1,0 +1,41 @@
+@prefix ff: <test:flintstones#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+ff:Fred a foaf:Person ;
+  ff:hasAge "75"^^xsd:integer ;
+  ff:hasSpouse ff:Wilma ;
+  ff:livesIn  ff:Bedrock ;
+  ff:hasChild ff:Pebbles .
+  
+ff:Wilma a foaf:Person ;
+  ff:hasAge "75"^^xsd:integer ;
+  ff:hasSpouse ff:Fred ;
+  ff:livesIn  ff:Bedrock ;
+  ff:hasChild ff:Pebbles .
+  
+ff:Pebbles a foaf:Person ;
+  ff:hasAge "50"^^xsd:integer ;
+  ff:hasSpouse ff:Bamm-Bamm ;
+  ff:livesIn ff:Bedrock ;
+  ff:hasChild ff:Roxy ;
+  ff:hasChild ff:Chip .
+  
+ff:Barney a foaf:Person ;
+  ff:hasAge "75"^^xsd:integer ;
+  ff:hasSpouse ff:Betty ;
+  ff:livesIn ff:Bedrock ;
+  ff:hasChild ff:Bamm-Bamm .
+  
+ff:Betty a foaf:Person ;
+  ff:hasAge "75"^^xsd:integer ;
+  ff:hasSpouse ff:Barney ;
+  ff:livesIn ff:Bedrock ;
+  ff:hasChild ff:Bamm-Bamm .
+
+ff:Bamm-Bamm a foaf:Person ; 
+  ff:hasAge "50"^^xsd:integer ;
+  ff:hasSpouse ff:Pebbles ;
+  ff:livesIn ff:Bedrock ;
+  ff:hasChild ff:Roxy ;
+  ff:hasChild ff:Chip .
