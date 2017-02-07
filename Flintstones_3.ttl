@@ -1,42 +1,46 @@
 @prefix ff: <test:flintstones#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix vocab: <http://purl.org/vocab/relationship/> .
 
 ff:Fred a foaf:Person ;
-  ff:hasAge "75"^^xsd:integer ;
+  ff:hasAge "46"^^xsd:integer ;
   vocab:spouseOf ff:Wilma ;
   ff:livesIn  ff:Bedrock ;
   vocab:parentOf ff:Pebbles .
   
 ff:Wilma a foaf:Person ;
-  ff:hasAge "75"^^xsd:integer ;
+  ff:hasAge "44"^^xsd:integer ;
   vocab:spouseOf ff:Fred ;
   ff:livesIn  ff:Bedrock ;
   vocab:parentOf ff:Pebbles .
   
 ff:Pebbles a foaf:Person ;
-  ff:hasAge "50"^^xsd:integer ;
+  ff:hasAge "25"^^xsd:integer ;
   vocab:spouseOf ff:Bamm-Bamm ;
   ff:livesIn ff:Bedrock ;
   vocab:parentOf ff:Roxy ;
   vocab:parentOf ff:Chip .
   
 ff:Barney a foaf:Person ;
-  ff:hasAge "75"^^xsd:integer ;
+  ff:hasAge "44"^^xsd:integer ;
   vocab:spouseOf ff:Betty ;
   ff:livesIn ff:Bedrock ;
   vocab:parentOf ff:Bamm-Bamm .
   
 ff:Betty a foaf:Person ;
-  ff:hasAge "75"^^xsd:integer ;
+  ff:hasAge "41"^^xsd:integer ;
   vocab:spouseOf ff:Barney ;
   ff:livesIn ff:Bedrock ;
   vocab:parentOf ff:Bamm-Bamm .
 
 ff:Bamm-Bamm a foaf:Person ;
-  ff:hasAge "50"^^xsd:integer ;
+  ff:hasAge "25"^^xsd:integer ;
   vocab:spouseOf ff:Pebbles ;
   ff:livesIn ff:Bedrock ;
   vocab:parentOf ff:Roxy ;
   vocab:parentOf ff:Chip .
+
+ff:Slate a foaf:Person ;
+  ff:hasAge "50"^^xsd:integer;
+  ff:livesIn ff:Bedrock .

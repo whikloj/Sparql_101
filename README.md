@@ -66,20 +66,22 @@ So your Resource index will have the following triples.
 
 The benefit of RDF is that one can share their ontology with the world or borrow from (and build upon) another's work.
 
-You can go it alone and create your own ontology which is allowed. For our Flintstones we might have [this](Flintstones.ttl). This ontology defines the relationships between people and between people and places.
+You can go it alone and create your own ontology which is allowed. For our Flintstones we might have this ([Flinstones v1](Flintstones.ttl)) as a dataset.
+
+Our custom ontology defines the relationships between people and between people and places.
 
 But there are others that will have objects that share these relationships and you can benefit from sharing those relationships. For instance the [FOAF (Friend Of A Friend) ontology](http://xmlns.com/foaf/spec/) "... is a project devoted to linking people and information using the Web."
 
 Because our Bedrock family members are all "people" and foaf has a class for that
 > The Person class represents people. Something is a Person if it is a person. We don't nitpic about whether they're alive, dead, real, or imaginary. 
 
-We can extend our data by defining each entry as a **foaf:Person**. So now we have [this](Flintstones_2.ttl).
+We can extend our data by defining each entry as a **foaf:Person**. This adds more context to our data, [Flintstones v.2](Flintstones_2.ttl).
 
-Not bad, but we have used our own vocabulary to define the _spouseOf_ and _parentOf_ relationships. I'm sure someone else somewhere has defined those relationships.
+Not bad, but we have used our own vocabulary to define the _hasSpouse_ and _hasChild_ relationships. I'm sure someone else somewhere has defined those relationships.
 
 The [**relationship**](http://vocab.org/relationship/) ontology also does this. So we don't have to re-invent the wheel and can make use of their _http://purl.org/vocab/relationship/spouseOf_ and _http://purl.org/vocab/relationship/parentOf_ predicates.
 
-Now our data becomes [this](Flintstones_3.ttl).
+Now our data still provides the same information, but using some shared predicates. Also I threw Mr. Slate in there as he doesn't have any children. [Flintstones v3](Flintstones_3.ttl).
 
 ### Sparql
 
@@ -87,16 +89,19 @@ The W3C Spec on Sparql 1.1 is split up in to a bunch of different specifications
 
 The 4 forms of Sparql querying are **SELECT**, **CONSTRUCT**, **ASK** and **DESCRIBE**
 
-We'll use our last set of data from above for these examples.
+I'm using the Flintstones v3 dataset from above.
 
 #### Select
 
-This is the form most people are comfortable with. You bind values to variables and return those variables.
+This is the form most people are comfortable with.
 
-An example using the above would be to find all of Pebbles children
+You bind _values_ to **variables** and return those variables.
+
+An example (using the above would be to find all of Pebbles children
 ```
 PREFIX ff: <test:flintstones#> 
 PREFIX vocab: <http://purl.org/vocab/relationship/>
+
 SELECT ?kids WHERE {
    ff:Pebbles vocab:parentOf ?kids .
 }
@@ -108,11 +113,12 @@ This will return
 | &lt;test:flintstones#Chip&gt; |
 | &lt;test:flintstones#Roxy &gt; |
 
-We know that the _vocab:parentOf_ predicate defines a parent to child relationship, this means that the parent is ALWAYS the subject and the child is ALWAYS the object. This makes it easy to determine parentage by slightly adjusting our query.
+We know that the _vocab:parentOf_ predicate defines a parent to child relationship, this means that the parent is ALWAYS the subject and the child is ALWAYS the object. This makes it easy to reverse this and find the parents of kids with the same data.
 
 ```
 PREFIX ff: <test:flintstones#> 
 PREFIX vocab: <http://purl.org/vocab/relationship/>
+
 SELECT ?parents WHERE {
    ?parents vocab:parentOf ff:Chip .
 }
@@ -127,13 +133,19 @@ What about following the relationships further?
 ```
 PREFIX ff: <test:flintstones#> 
 PREFIX vocab: <http://purl.org/vocab/relationship/>
+
 SELECT ?grandChild WHERE {
    ff:Fred vocab:parentOf ?kid .
    ?kid vocab:parentOf ?grandChild .
 }
 ```
 
-So here we found all the children of Fred and assigned them to a variable, then we use the values in that variable and find all children of those people. This becomes two generations and allows us to find grandchildren.
+So here we:
+
+1. found all the children of Fred and assigned them to a variable (?kid).
+2. used the values in the variable ?kid in another match to find all children of those people.
+
+This allows us to follow two generations and allows us to find grandchildren from grandparents. The result is:
 
 | ?grandChild |
 | :---: |
@@ -157,6 +169,9 @@ CONSTRUCT {
 }
 ```
 
+So here we are creating our own graph made of people that have children that have children.
+
+
 | subject | predicate | object |
 | :---: | :---: | :---: |
 | &lt;test:flintstones#Barney&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Chip&gt; | 
@@ -168,6 +183,104 @@ CONSTRUCT {
 | &lt;test:flintstones#Fred&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Roxy&gt; | 
 | &lt;test:flintstones#Wilma&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Roxy&gt; | 
 
+Notice that Mr. Slate does not appear as he is doesn't match our where clause.
+
+#### Ask
+
+An **Ask** query is used to test whether or not a query pattern has a solution. It returns "true" or "false". The benefit here is that once the pattern matches once your query halts and you don't have to wait for it to resolve all possible matches.
+
+So to find out if anyone is between the ages of 20 and 22 (inclusive), we can do
+```
+PREFIX ff: <test:flintstones#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+ASK {
+  ?person ff:hasAge ?age .
+  FILTER(?age >= "20"^^xsd:integer && ?age <= "23"^^xsd:integer)
+}
+```
+
+| false |
+
+Ok how about 40 and 42 (hint: Betty was 41). 
+
+```
+PREFIX ff: <test:flintstones#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+ASK {
+  ?person ff:hasAge ?age .
+  FILTER(?age >= "40"^^xsd:integer && ?age <= "42"^^xsd:integer)
+}
+```
+
+| true |
+
+This doesn't tell us anything about those matching records, except that they exist. This can be more efficient as the query halts once the first match is found. It only keeps running if it doesn't find a match.
+
+#### Describe
+
+**Describe** is useful for seeing information about the resources returned by your query.
+
+So if we did a query to find the "people" who are 44 years old.
+```
+PREFIX ff: <test:flintstones#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?x
+WHERE {
+  ?x ff:hasAge "44"^^xsd:integer
+}
+```
+
+We would get back 
+
+| ?x |
+| :---: |
+| &lt;test:flintstones#Barney&gt; |
+| &lt;test:flintstones#Wilma&gt; |
+
+
+But if we changed SELECT to DESCRIBE...
+
+```
+PREFIX ff: <test:flintstones#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?x
+WHERE {
+  ?x ff:hasAge "44"^^xsd:integer
+}
+```
+
+
+This returns all triples that refer to the results of our query.
+
+| subject | predicate | object | 
+| :---: | :---: | :---: |
+| &lt;test:flintstones#Betty&gt; | &lt;http://purl.org/vocab/relationship/spouseOf&gt; | &lt;test:flintstones#Barney&gt; | 
+| &lt;test:flintstones#Fred&gt; | &lt;http://purl.org/vocab/relationship/spouseOf&gt; | &lt;test:flintstones#Wilma&gt; | 
+| &lt;test:flintstones#Pearl&gt; | &lt;http://purl.org/vocab/relationship/parentOf&gt; | &lt;test:flintstones#Wilma&gt; | 
+| &lt;test:flintstones#Ricky&gt; | &lt;http://purl.org/vocab/relationship/parentOf&gt; | &lt;test:flintstones#Wilma&gt; | 
+| &lt;test:flintstones#Barney&gt; | &lt;http://purl.org/vocab/relationship/parentOf&gt; | &lt;test:flintstones#Bamm-Bamm&gt; | 
+| &lt;test:flintstones#Barney&gt; | &lt;http://purl.org/vocab/relationship/spouseOf&gt; | &lt;test:flintstones#Betty&gt; | 
+| &lt;test:flintstones#Barney&gt; | &lt;test:flintstones#hasAge&gt; | 44 | 
+| &lt;test:flintstones#Barney&gt; | &lt;test:flintstones#livesIn&gt; | &lt;test:flintstones#Bedrock&gt; | 
+| &lt;test:flintstones#Barney&gt; | rdf:type | foaf:Person | 
+| &lt;test:flintstones#Barney&gt; | foaf:familyName | Rubble | 
+| &lt;test:flintstones#Barney&gt; | foaf:givenName | Bernard | 
+| &lt;test:flintstones#Barney&gt; | foaf:name | Barney Rubble | 
+| &lt;test:flintstones#Wilma&gt; | &lt;http://purl.org/vocab/relationship/parentOf&gt; | &lt;test:flintstones#Pebbles&gt; | 
+| &lt;test:flintstones#Wilma&gt; | &lt;http://purl.org/vocab/relationship/spouseOf&gt; | &lt;test:flintstones#Fred&gt; | 
+| &lt;test:flintstones#Wilma&gt; | &lt;test:flintstones#hasAge&gt; | 44 | 
+| &lt;test:flintstones#Wilma&gt; | &lt;test:flintstones#livesIn&gt; | &lt;test:flintstones#Bedrock&gt; | 
+| &lt;test:flintstones#Wilma&gt; | rdf:type | foaf:Person | 
+| &lt;test:flintstones#Wilma&gt; | foaf:familyName | Slaghoople | 
+| &lt;test:flintstones#Wilma&gt; | foaf:givenName | Pebbles | 
+| &lt;test:flintstones#Wilma&gt; | foaf:givenName | Wilma | 
+| &lt;test:flintstones#Wilma&gt; | foaf:name | Wilma Flintstone | 
+
+So in our original query we returned Wilma and Barney, and this second query returned any triple that has the `&lt;test:flintstones#Wilma&gt;` or `&lt;test:flintstones#Barney&gt;` in them anywhere.
 
 ### Predicates and Prefixes
 

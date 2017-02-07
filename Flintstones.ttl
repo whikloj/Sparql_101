@@ -1,33 +1,33 @@
 @prefix ff: <test:flintstones#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-ff:Fred ff:hasAge "75"^^xsd:integer ;
+ff:Fred ff:hasAge "46"^^xsd:integer ;
   ff:hasSpouse ff:Wilma ;
   ff:livesIn  ff:Bedrock ;
   ff:hasChild ff:Pebbles .
   
-ff:Wilma ff:hasAge "75"^^xsd:integer ;
+ff:Wilma ff:hasAge "44"^^xsd:integer ;
   ff:hasSpouse ff:Fred ;
   ff:livesIn  ff:Bedrock ;
   ff:hasChild ff:Pebbles .
   
-ff:Pebbles ff:hasAge "50"^^xsd:integer ;
+ff:Pebbles ff:hasAge "25"^^xsd:integer ;
   ff:hasSpouse ff:Bamm-Bamm ;
   ff:livesIn ff:Bedrock ;
   ff:hasChild ff:Roxy ;
   ff:hasChild ff:Chip .
   
-ff:Barney ff:hasAge "75"^^xsd:integer ;
+ff:Barney ff:hasAge "44"^^xsd:integer ;
   ff:hasSpouse ff:Betty ;
   ff:livesIn ff:Bedrock ;
   ff:hasChild ff:Bamm-Bamm .
   
-ff:Betty ff:hasAge "75"^^xsd:integer ;
+ff:Betty ff:hasAge "41"^^xsd:integer ;
   ff:hasSpouse ff:Barney ;
   ff:livesIn ff:Bedrock ;
   ff:hasChild ff:Bamm-Bamm .
 
-ff:Bamm-Bamm ff:hasAge "50"^^xsd:integer ;
+ff:Bamm-Bamm ff:hasAge "25"^^xsd:integer ;
   ff:hasSpouse ff:Pebbles ;
   ff:livesIn ff:Bedrock ;
   ff:hasChild ff:Roxy ;
