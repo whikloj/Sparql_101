@@ -3,6 +3,7 @@
 This repository covers the content of the above titled workshop at IslandoraCon 2017.
 
 ## Outline
+
 * Introduction
 * RDF and SPARQL
 * Fedora Resource Index
@@ -62,6 +63,7 @@ So your Resource index will have the following triples.
 | info:fedora/uofm:9333 | islandora:isManageableByUser | xxxx |
 | info:fedora/uofm:9333 | islandora:isManageableByRole | yyyy |
 
+---
 ### RDF and shared ontologies
 
 The benefit of RDF is that one can share their ontology with the world or borrow from (and build upon) another's work.
@@ -83,15 +85,16 @@ The [**relationship**](http://vocab.org/relationship/) ontology also does this. 
 
 Now our data still provides the same information, but using some shared predicates. Also I threw Mr. Slate in there as he doesn't have any children. [Flintstones v3](Flintstones_3.ttl).
 
-### Sparql
+## Sparql
 
 The W3C Spec on Sparql 1.1 is split up in to a bunch of different specifications. We'll concentrate on the [Query](https://www.w3.org/TR/sparql11-query/) and maybe some [Update](https://www.w3.org/TR/sparql11-update/).
 
 The 4 forms of Sparql querying are **SELECT**, **CONSTRUCT**, **ASK** and **DESCRIBE**
 
-I'm using the Flintstones v3 dataset from above.
+I'm using this [large Flintstones dataset](Flintstones_all.ttl) for the below examples.
 
-#### Select
+___
+### Select
 
 This is the form most people are comfortable with.
 
@@ -113,6 +116,7 @@ This will return
 | &lt;test:flintstones#Chip&gt; |
 | &lt;test:flintstones#Roxy &gt; |
 
+<br><br>
 We know that the _vocab:parentOf_ predicate defines a parent to child relationship, this means that the parent is ALWAYS the subject and the child is ALWAYS the object. This makes it easy to reverse this and find the parents of kids with the same data.
 
 ```
@@ -129,6 +133,7 @@ SELECT ?parents WHERE {
 | &lt;test:flintstones#Bamm-Bamm&gt; |
 | &lt;test:flintstones#Pebbles&gt; |
 
+<br><br>
 What about following the relationships further?
 ```
 PREFIX ff: <test:flintstones#> 
@@ -152,7 +157,8 @@ This allows us to follow two generations and allows us to find grandchildren fro
 | &lt;test:flintstones#Chip&gt; |
 | &lt;test:flintstones#Roxy&gt; |
 
-#### Construct
+---
+### Construct
 
 Construct returns a single RDF graph generated using a template and replacing variables with values in other graphs. 
 
@@ -178,14 +184,21 @@ So here we are creating our own graph made of people that have children that hav
 | &lt;test:flintstones#Betty&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Chip&gt; | 
 | &lt;test:flintstones#Barney&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Roxy&gt; | 
 | &lt;test:flintstones#Betty&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Roxy&gt; | 
+| &lt;test:flintstones#Ed&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Pebbles&gt; | 
+| &lt;test:flintstones#Edna&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Pebbles&gt; | 
 | &lt;test:flintstones#Fred&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Chip&gt; | 
 | &lt;test:flintstones#Wilma&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Chip&gt; | 
 | &lt;test:flintstones#Fred&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Roxy&gt; | 
 | &lt;test:flintstones#Wilma&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Roxy&gt; | 
+| &lt;test:flintstones#Pearl&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Pebbles&gt; | 
+| &lt;test:flintstones#Ricky&gt; | &lt;test:flintstones#grandparentOf&gt; | &lt;test:flintstones#Pebbles&gt; | 	
+
+So here we have entries for Fred, Wilma, Barney & Betty -> Chip & Roxy. We also have entries from Ed & Edna (Fred's parents) and Ricky & Pearl (Wilma's parents) to their grandchild Pebbles. 
 
 Notice that Mr. Slate does not appear as he is doesn't match our where clause.
 
-#### Ask
+---
+### Ask
 
 An **Ask** query is used to test whether or not a query pattern has a solution. It returns "true" or "false". The benefit here is that once the pattern matches once your query halts and you don't have to wait for it to resolve all possible matches.
 
@@ -200,8 +213,11 @@ ASK {
 }
 ```
 
+| |
+| :---: |
 | false |
 
+<br><br>
 Ok how about 40 and 42 (hint: Betty was 41). 
 
 ```
@@ -218,7 +234,8 @@ ASK {
 
 This doesn't tell us anything about those matching records, except that they exist. This can be more efficient as the query halts once the first match is found. It only keeps running if it doesn't find a match.
 
-#### Describe
+---
+### Describe
 
 **Describe** is useful for seeing information about the resources returned by your query.
 
@@ -240,7 +257,7 @@ We would get back
 | &lt;test:flintstones#Barney&gt; |
 | &lt;test:flintstones#Wilma&gt; |
 
-
+<br><br>
 But if we changed SELECT to DESCRIBE...
 
 ```
