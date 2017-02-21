@@ -19,9 +19,15 @@ The RELS-EXT datastream on a Fedora resource contains an [RDF](https://www.w3.or
 
 Those statements are also added to the **Resource Index**, in the case of a standard Islandora and Fedora installation this is [Mulgara](http://www.mulgara.org/).
 
-Mulgara is a *triplestore* or an RDF Store. Its called a *triplestore* because it *stores triples*.
+Mulgara is a *triplestore* or an RDF Store.
 
-What's a triple?
+http://www.linkeddatatools.com/introducing-rdf
+
+For most types of data, there is the concept of some elements of data having more importance over other elements. For example in a relational database you might store all your data in various tables and link them by primary key, or in an XML document you might use the hierarchy to infer importance. But in a _triplestore_ there is no inherant importantance or hierarchy. Anything can be linked to anything else.
+
+So why is it called a *triplestore*? Because it *stores triples*.
+
+**What's a triple?**
 > A triple is the atomic unit of data in the semantic web; just like a row was the atomic unit of data in the old world, the triple is the row of the new world.
 -- https://data-gov.tw.rpi.edu/wiki/Triples
 
@@ -63,6 +69,14 @@ So your Resource index will have the following triples.
 | info:fedora/uofm:9333 | islandora:isManageableByUser | xxxx |
 | info:fedora/uofm:9333 | islandora:isManageableByRole | yyyy |
 
+**What's a graph?**
+> An RDF graph is a set of RDF triples.
+-- https://www.w3.org/TR/rdf11-concepts/#section-rdf-graph
+
+For our purposes a graph is the `FROM <#ri>` we see in all our Sparql queries. Fedora used this default graph to store our information.
+
+You could have multiple graphs in a triplestore and you can query them independantly of each other or query across those graphs. But that is a lesson for another day.
+
 ---
 ### RDF and shared ontologies
 
@@ -92,6 +106,54 @@ The W3C Spec on Sparql 1.1 is split up in to a bunch of different specifications
 The 4 forms of Sparql querying are **SELECT**, **CONSTRUCT**, **ASK** and **DESCRIBE**
 
 I'm using this [large Flintstones dataset](Flintstones_all.ttl) for the below examples.
+
+___
+### Predicates and Prefixes
+
+One of the things to remember when writing any Sparql queries is to always define your prefixes. 
+
+We've become spoiled because Fedora has a set of prefixes that are recognized by default. These are:
+
+| Prefix | Namespace |
+| --- | --- |
+| test	 | http://example.org/terms# |
+| fedora-rels-ext |	info:fedora/fedora-system:def/relations-external# |
+| fedora | info:fedora/ |
+| rdf | http://www.w3.org/1999/02/22-rdf-syntax-ns# |
+| fedora-model | info:fedora/fedora-system:def/model# |
+| fedora-view | info:fedora/fedora-system:def/view# |
+| mulgara | http://mulgara.org/mulgara# |
+| dc | http://purl.org/dc/elements/1.1/ |
+| xml-schema | http://www.w3.org/2001/XMLSchema# |
+
+So many of our Islandora queries appear in code [like this](https://github.com/Islandora/islandora_paged_content/blob/7.x/includes/utilities.inc#L61-L76).
+
+The internally registered prefixes allow you to avoid registering them in your query. However, because this is only good for Mulgara you run into trouble if you switch to using a different triplestore.
+
+You can avoid that problem by simply registering each prefix you intend to use in your query, so the above example becomes.
+```
+  PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
+  PREFIX fedora-model: <info:fedora/fedora-system:def/model#>
+  PREFIX fedora-view: <info:fedora/fedora-system:def/view#>
+  PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
+  SELECT ?pid ?page ?label ?width ?height
+  FROM <#ri>
+  WHERE {
+    ?pid fedora-rels-ext:isMemberOf <info:fedora/{$object->id}> ;
+         fedora-model:label ?label ;
+         islandora-rels-ext:isSequenceNumber ?page ;
+         fedora-model:state fedora-model:Active .
+    OPTIONAL {
+      ?pid fedora-view:disseminates ?dss .
+      ?dss fedora-view:disseminationType <info:fedora/*/JP2> ;
+           islandora-rels-ext:width ?width ;
+           islandora-rels-ext:height ?height .
+   }
+  }
+  ORDER BY ?page
+```
+
+Now this query will operate identically on any triplestore that support Sparql.
 
 ___
 ### Select
@@ -299,49 +361,10 @@ This returns all triples that refer to the results of our query.
 
 So in our original query we returned Wilma and Barney, and this second query returned any triple that has the `&lt;test:flintstones#Wilma&gt;` or `&lt;test:flintstones#Barney&gt;` in them anywhere.
 
-### Predicates and Prefixes
+**Note**: DESCRIBE queries don't seem to be supported by Mulgara through Fedora.
 
-One of the things to remember when writing any Sparql queries is to always define your prefixes. 
 
-We've become spoiled because Fedora has a set of prefixes that are recognized by default. These are:
 
-| Prefix | Namespace |
-| --- | --- |
-| test	 | http://example.org/terms# |
-| fedora-rels-ext |	info:fedora/fedora-system:def/relations-external# |
-| fedora | info:fedora/ |
-| rdf | http://www.w3.org/1999/02/22-rdf-syntax-ns# |
-| fedora-model | info:fedora/fedora-system:def/model# |
-| fedora-view | info:fedora/fedora-system:def/view# |
-| mulgara | http://mulgara.org/mulgara# |
-| dc | http://purl.org/dc/elements/1.1/ |
-| xml-schema | http://www.w3.org/2001/XMLSchema# |
 
-So many of our Islandora queries appear in code [like this](https://github.com/Islandora/islandora_paged_content/blob/7.x/includes/utilities.inc#L61-L76).
 
-The internally registered prefixes allow you to avoid registering them in your query. However, because this is only good for Mulgara you run into trouble if you switch to using a different triplestore.
 
-You can avoid that problem by simply registering each prefix you intend to use in your query, so the above example becomes.
-```
-  PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
-  PREFIX fedora-model: <info:fedora/fedora-system:def/model#>
-  PREFIX fedora-view: <info:fedora/fedora-system:def/view#>
-  PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
-  SELECT ?pid ?page ?label ?width ?height
-  FROM <#ri>
-  WHERE {
-    ?pid fedora-rels-ext:isMemberOf <info:fedora/{$object->id}> ;
-         fedora-model:label ?label ;
-         islandora-rels-ext:isSequenceNumber ?page ;
-         fedora-model:state fedora-model:Active .
-    OPTIONAL {
-      ?pid fedora-view:disseminates ?dss .
-      ?dss fedora-view:disseminationType <info:fedora/*/JP2> ;
-           islandora-rels-ext:width ?width ;
-           islandora-rels-ext:height ?height .
-   }
-  }
-  ORDER BY ?page
-```
-
-Now this query will operate identically on any triplestore that support Sparql.
