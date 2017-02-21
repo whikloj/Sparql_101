@@ -1,0 +1,101 @@
+@prefix ff: <test:flintstones#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vocab: <http://purl.org/vocab/relationship/> .
+
+ff:Fred a foaf:Person ;
+  foaf:familyName "Flintstone" ;
+  foaf:givenName "Fred" ;
+  foaf:givenName "Joseph" ;
+  foaf:name "Fred Flintsone" ;
+  ff:hasAge "46"^^xsd:integer ;
+  vocab:spouseOf ff:Wilma ;
+  ff:livesIn  ff:Bedrock ;
+  vocab:parentOf ff:Pebbles .
+  
+ff:Wilma a foaf:Person ;
+  foaf:familyName "Slaghoople" ;
+  foaf:givenName "Wilma" ;
+  foaf:givenName "Pebbles" ;
+  foaf:name "Wilma Flintstone" ;
+  ff:hasAge "44"^^xsd:integer ;
+  vocab:spouseOf ff:Fred ;
+  ff:livesIn  ff:Bedrock ;
+  vocab:parentOf ff:Pebbles .
+  
+ff:Pebbles a foaf:Person ;
+  foaf:familyName "Flintstone" ;
+  foaf:givenName "Pebbles" ;
+  foaf:name "Pebbles Flintstone" ;
+  ff:hasAge "25"^^xsd:integer ;
+  vocab:spouseOf ff:Bamm-Bamm ;
+  ff:livesIn ff:Bedrock ;
+  vocab:parentOf ff:Roxy ;
+  vocab:parentOf ff:Chip .
+  
+ff:Barney a foaf:Person ;
+  foaf:familyName "Rubble" ;
+  foaf:givenName "Bernard" ;
+  foaf:name "Barney Rubble" ;
+  ff:hasAge "44"^^xsd:integer ;
+  vocab:spouseOf ff:Betty ;
+  ff:livesIn ff:Bedrock ;
+  vocab:parentOf ff:Bamm-Bamm .
+  
+ff:Betty a foaf:Person ;
+  foaf:familyName "McBricker" ;
+  foaf:givenName "Elizabeth" ;
+  foaf:givenName "Jean" ;
+  foaf:name "Betty Rubble" ;
+  ff:hasAge "41"^^xsd:integer ;
+  vocab:spouseOf ff:Barney ;
+  ff:livesIn ff:Bedrock ;
+  vocab:parentOf ff:Bamm-Bamm .
+
+ff:Bamm-Bamm a foaf:Person ;
+  foaf:familyName "Rubble" ;
+  foaf:givenName "Bamm-Bamm" ;
+  foaf:name "Bamm-Bamm Rubble" ;
+  ff:hasAge "25"^^xsd:integer ;
+  vocab:spouseOf ff:Pebbles ;
+  ff:livesIn ff:Bedrock ;
+  vocab:parentOf ff:Roxy ;
+  vocab:parentOf ff:Chip .
+
+ff:Slate a foaf:Person ;
+  foaf:familyName "Slate" ;
+  foaf:name "Mr. Slate" ;
+  ff:hasAge "50"^^xsd:integer;
+  ff:livesIn ff:Bedrock .
+  
+ff:Pearl a foaf:Person ;
+  foaf:familyName "Pebble" ;
+  foaf:givenName "Pearl" ;
+  foaf:name "Pearl Slaghoople" ;
+  ff:hasAge "60"^^xsd:integer ;
+  vocab:parentOf ff:Wilma ;
+  vocab:spouseOf ff:Ricky .
+  
+ff:Ricky a foaf:Person ;
+  foaf:familyName "Slaghoople" ;
+  foaf:givenName "Ricky" ;
+  foaf:name "Ricky Slaghoople" ;
+  vocab:parentOf ff:Wilma ;
+  vocab:spouseOf ff:Pearl .
+  
+ff:Ed a foaf:Person ;
+  foaf:familyName "Flintstone" ;
+  foaf:givenName "Ed" ;
+  foaf:name "Ed Flintstone" ;
+  vocab:parentOf ff:Fred ;
+  vocab:spouseOf ff:Edna .
+
+ff:Edna a foaf:Person ;
+  foaf:familyName "Hardrock" ;
+  foaf:givenName "Edna" ;
+  foaf:name "Edna Flinstone" ;
+  vocab:parentOf ff:Fred ;
+  vocab:spouseOf ff:Ed .
+  
+ff:Quarry a foaf:Organization .
+  
