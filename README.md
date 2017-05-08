@@ -23,7 +23,7 @@ Mulgara is a *triplestore* or an RDF Store.
 
 http://www.linkeddatatools.com/introducing-rdf
 
-For most types of data, there is the concept of some elements of data having more importance over other elements. For example in a relational database you might store all your data in various tables and link them by primary key, or in an XML document you might use the hierarchy to infer importance. But in a _triplestore_ there is no inherant importantance or hierarchy. Anything can be linked to anything else.
+For most types of data, there is the concept of some elements of data having more importance over other elements. For example in a relational database you might store all your data in various tables and link them by primary key, or in an XML document you might use the hierarchy to infer importance. But in a _triplestore_ there is no inherant importance or hierarchy. Anything can be linked to anything else.
 
 So why is it called a *triplestore*? Because it *stores triples*.
 
