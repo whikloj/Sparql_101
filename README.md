@@ -359,7 +359,7 @@ This returns all triples that refer to the results of our query.
 | &lt;test:flintstones#Wilma&gt; | foaf:givenName | Wilma | 
 | &lt;test:flintstones#Wilma&gt; | foaf:name | Wilma Flintstone | 
 
-So in our original query we returned Wilma and Barney, and this second query returned any triple that has the `&lt;test:flintstones#Wilma&gt;` or `&lt;test:flintstones#Barney&gt;` in them anywhere.
+So in our original query we returned Wilma and Barney, and this second query returned any triple that has the `<test:flintstones#Wilma>` or `<test:flintstones#Barney>` in them anywhere.
 
 **Note**: DESCRIBE queries don't seem to be supported by Mulgara through Fedora.
 
