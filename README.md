@@ -326,7 +326,7 @@ But if we changed SELECT to DESCRIBE...
 PREFIX ff: <test:flintstones#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-SELECT ?x
+DESCRIBE ?x
 WHERE {
   ?x ff:hasAge "44"^^xsd:integer
 }
