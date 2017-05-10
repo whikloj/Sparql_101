@@ -5,15 +5,25 @@ This repository covers the content of the above titled workshop at IslandoraCon 
 ## Outline
 
 * Introduction
-* RDF and SPARQL
-* Fedora Resource Index
-* Sparql
+* [RDF, Triplestores and SPARQL](#rdf-triplestores-and-sparql)
+   * [RDF and shared ontologies](#rdf-and-shared-ontologies)
+* [Sparql](#sparql)
+   * [Predicates and Prefixes](#predicates-and-prefixes)
+   * [SELECT](#select)
+   * [CONSTRUCT](#construct)
+   * [ASK](#ask)
+   * [DESCRIBE](#describe)
+* [Sparql-Update](#sparql-update)
+   * [INSERT](#adding-data-insert)
+   * [DELETE](#deleting-data-delete)
+
 
 ## Introduction
 
 Fedora (version 3) provided a built-in semantic store to hold the information about Fedora resources. This is commonly referred to as the [Resource Index](https://wiki.duraspace.org/display/FEDORA38/Resource+Index)
 
-## RDF, Triplestores and SPARQL, oh my!
+## RDF, Triplestores and SPARQL
+  **oh my!**
 
 The RELS-EXT datastream on a Fedora resource contains an [RDF](https://www.w3.org/RDF/) description of the relationships between that resource and others, it also contains other information about that resource. 
 
@@ -101,7 +111,7 @@ Now our data still provides the same information, but using some shared predicat
 
 ## Sparql
 
-The W3C Spec on Sparql 1.1 is split up in to a bunch of different specifications. We'll concentrate on the [Query](https://www.w3.org/TR/sparql11-query/) and maybe some [Update](https://www.w3.org/TR/sparql11-update/).
+The W3C Spec on Sparql 1.1 is split up in to a bunch of different specifications. We'll concentrate on the [Query](https://www.w3.org/TR/sparql11-query/) here and [Update](https://www.w3.org/TR/sparql11-update/) below.
 
 The 4 forms of Sparql querying are **SELECT**, **CONSTRUCT**, **ASK** and **DESCRIBE**
 
@@ -363,7 +373,145 @@ So in our original query we returned Wilma and Barney, and this second query ret
 
 **Note**: DESCRIBE queries don't seem to be supported by Mulgara through Fedora.
 
+## Sparql-Update
 
+Sparql-Update ([W3C spec](https://www.w3.org/TR/sparql11-update/)) is syntax based around updating RDF information. This is the syntax you use to add, delete or update triples in a triplestore. **It is also how you update information directly in Fedora (versions 4+)**
+
+Generally this is done by a `PATCH` HTTP request.
+
+We'll stick to single graph operations for now.
+
+### Adding data (INSERT)
+
+To add triples/RDF you use the keyword `INSERT`, inserts come in generally two types literal and informative.
+
+A literal `INSERT` is when you provide all parts of the triple. You also use the keyword `DATA` after insert
+
+For example:
+```
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+INSERT DATA
+{ 
+   <http://example/book1> dc:title "A new book" .
+}
+```
+
+This will insert one triple into your triplestore, you can also do.
+```
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+INSERT DATA
+{ 
+   <http://example/book1> dc:title "A new book" ;
+                          dc:author "Jane Smith" .
+}
+```
+
+This will insert two triples.
+
+The other form is informative, that is akin to a SQL `INSERT ... WHERE` statement.
+
+For example, if you want to add a new `example:nationality` predicate with `Canadian` for all of Margaret Atwood's novels. You would:
+```
+PREFIX example <http://whatever.org/smashing/predicates/>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+INSERT {
+  ?book example:nationality "Canadian" .
+} 
+WHERE {
+  ?book dc:author <https://www.loc.gov/item/n79102766/margaret-atwood/>
+}
+```
+
+Now you are doing a query for all `?book`s that have the author of Margaret Atwood (or rather an authority record for her) and using those query results to determine what new triples you are adding.
+
+### Deleting data (DELETE)
+
+Delete works much the same as [INSERT](#adding-data-insert), it also has a literal and informative syntax.
+
+ie.
+```
+DELETE DATA {
+   <http://example/book7> dc:title "Bad data" .
+}
+```
+
+This will only delete the triple that _exactly_ matches this one.
+
+For informative, we can delete all the history books.
+
+```
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+DELETE {
+  ?book ?p ?v
+}
+WHERE {
+  ?book dc:subject "history" .
+  ?book ?p ?v
+}
+```
+
+**Note**: When using the `INSERT {} WHERE {}` or `DELETE {} WHERE {}` the `WHERE {}` part is executed first and its results determine what gets INSERT/DELETE. If it returns 0 results, there will be no action.
+
+For example, if I have no books by Neil Gaiman in my triplestore and try to execute.
+```
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX example <http://whatever.org/smashing/predicates/>
+INSERT {
+  ?book example:something "Wonderful" .
+}
+WHERE {
+  ?book dc:author "Gaiman, Neil" .
+}
+```
+Nothing happens as the result of the `WHERE` clause is 0 records.
+
+### Replacing values
+
+Pretend you have a bad title, like "The Dark Twower" and you want to fix it. 
+
+| subject | predicate | object |
+|:---:|:---:|:---:|
+| &lt;http://example.org/book1&gt; | dc:title |The Dark Twower |
+
+If you do:
+```
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+INSERT {
+  ?book dc:title "The Dark Tower" .
+}
+WHERE {
+  ?book dc:title "The Dark Twower" .
+}
+```
+
+You end up with 2 _dc:title_ for the book. 
+| subject | predicate | object |
+|:---:|:---:|:---:|
+| &lt;http://example.org/book1&gt; | dc:title |The Dark Twower |
+| &lt;http://example.org/book1&gt; | dc:title | The Dark Tower |
+
+It does not automatically **replace**, because you can add as many _titles_ as you'd like.
+
+To replace this incorrect value, you need to delete the exact wrong triple (or all values) and then insert your new one.
+
+For example:
+```
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+DELETE {
+  ?book dc:title "The Dark Twower" .
+}
+INSERT {
+  ?book dc:title "The Dark Tower" .
+}
+WHERE {
+  ?book dc:title "The Dark Twower" .
+}
+```
+
+How this executes is
+1. It does the `SELECT` in the `WHERE` clause. Find all books with a dc:title matching "The Dark Twower".
+2. Using the list of books from step 1, delete any dc:title predicates with a value of "The Dark Twower".
+3. Lastly, again using the list of books in step 1, insert a new triple of predicate dc:title and value "The Dark Tower".
 
 
 
