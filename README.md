@@ -311,7 +311,30 @@ This doesn't tell us anything about those matching records, except that they exi
 
 **Describe** is useful for seeing information about the resources returned by your query.
 
-So if we did a query to find the "people" who are 44 years old.
+A simple example is
+```
+PREFIX ff: <test:flintstones#>
+DESCRIBE ff:Wilma
+```
+
+Which returns **all** triples that have _Wilma_ as the subject or object.
+
+| subject | predicate | object | 
+| :---: | :---: | :---: |
+| &lt;test:flintstones#Fred&gt; | &lt;http://purl.org/vocab/relationship/spouseOf&gt; | &lt;test:flintstones#Wilma&gt; | 
+| &lt;test:flintstones#Pearl&gt; | &lt;http://purl.org/vocab/relationship/parentOf&gt; | &lt;test:flintstones#Wilma&gt; | 
+| &lt;test:flintstones#Ricky&gt; | &lt;http://purl.org/vocab/relationship/parentOf&gt; | &lt;test:flintstones#Wilma&gt; | 
+| &lt;test:flintstones#Wilma&gt; | &lt;http://purl.org/vocab/relationship/parentOf&gt; | &lt;test:flintstones#Pebbles&gt; | 
+| &lt;test:flintstones#Wilma&gt; | &lt;http://purl.org/vocab/relationship/spouseOf&gt; | &lt;test:flintstones#Fred&gt; | 
+| &lt;test:flintstones#Wilma&gt; | &lt;test:flintstones#hasAge&gt; | 44 | 
+| &lt;test:flintstones#Wilma&gt; | &lt;test:flintstones#livesIn&gt; | &lt;test:flintstones#Bedrock&gt; | 
+| &lt;test:flintstones#Wilma&gt; | rdf:type | foaf:Person | 
+| &lt;test:flintstones#Wilma&gt; | foaf:familyName | Slaghoople | 
+| &lt;test:flintstones#Wilma&gt; | foaf:givenName | Pebbles | 
+| &lt;test:flintstones#Wilma&gt; | foaf:givenName | Wilma | 
+| &lt;test:flintstones#Wilma&gt; | foaf:name | Wilma Flintstone | 
+
+Another example is if we do a query to find the "people" who are 44 years old.
 ```
 PREFIX ff: <test:flintstones#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -370,6 +393,13 @@ This returns all triples that refer to the results of our query.
 | &lt;test:flintstones#Wilma&gt; | foaf:name | Wilma Flintstone | 
 
 So in our original query we returned Wilma and Barney, and this second query returned any triple that has the `<test:flintstones#Wilma>` or `<test:flintstones#Barney>` in them anywhere.
+
+In an Islandora 7.x-1.x context you can find all the information about an object by performing
+```
+DESCRIBE <info:fedora/PID>
+```
+
+Where _PID_ is the PID of the object you want to see all the information for.
 
 **Note**: DESCRIBE queries don't seem to be supported by Mulgara through Fedora.
 
